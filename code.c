@@ -12,9 +12,34 @@ struct command
 };
 
 // Создание процессов
-void proccess_create(struct command massive_command)
+void proccess_create(struct command * massive_command)
 {
-       
+    char command[256];  // Буфер команды
+    int index = 0;      // Номер команды
+    int result_code;    // Код возврата system
+
+    // Извлечение команды из набора введенных команд
+    while(strcmp(massive_command[index].name_comand, "\0") != 0)
+    {
+        memset(command, 0, sizeof(char));
+        strcpy(command, massive_command[index].name_comand);
+
+        int index_argument = 0;
+        // Извлечение аргументов команды
+        while (strcmp(massive_command[index].arguments[index_argument], "\0") != 0)
+        {
+            strcat(command, massive_command[index].arguments[index_argument]);
+            index_argument+=1;
+        }
+        
+        result_code = system(command);    // Вызов процеса по переданной команде
+
+        // Ошибка вызова процесса
+        if(result_code == 127 || result_code == -1)
+            printf("Command %s incorrect", command);
+
+        index+=1;
+    }
 }
 
 struct command extraction_commands(struct command * massive_command)
@@ -54,7 +79,6 @@ struct command extraction_commands(struct command * massive_command)
     return *massive_command;
 }
 
-
 int main(int argc, char * argv[])
 {
     struct command massive_command[10]; // Массив команд
@@ -76,7 +100,7 @@ int main(int argc, char * argv[])
             }
         }
 
-        proccess_create(*massive_command);  // Создание процессов
+        proccess_create(massive_command);  // Создание процессов
 
         // Очистка предыдущих команд
         memset(massive_command, 0, sizeof(struct command));
